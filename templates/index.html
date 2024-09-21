@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ağ Güvenliği İzleme Sistemi</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .table-container {
+            width: 48%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ağ Güvenliği İzleme Sistemi</h1>
+
+    <h2>Top 10 Source IPs</h2>
+    <ul id="top-ips">
+        {% for ip, count in top_ips %}
+            <li>{{ ip }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Algılanan Anomaliler</h2>
+    <div class="container">
+        <div class="table-container">
+            <h3>İç Ağ Anomalileri</h3>
+            <table id="internal-anomaly-table">
+                <thead>
+                    <tr>
+                        <th>IP Adresi</th>
+                        <th>Görünme Sayısı</th>
+                    </tr>
+                </thead>
+                <tbody id="internal-anomalies"></tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <h3>Dış Ağ Anomalileri</h3>
+            <table id="external-anomaly-table">
+                <thead>
+                    <tr>
+                        <th>IP Adresi</th>
+                        <th>Görünme Sayısı</th>
+                    </tr>
+                </thead>
+                <tbody id="external-anomalies"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <button id="load-more">Daha Fazla Göster</button>
+    <button id="show-all">Tamamını Görüntüle</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function updateData() {
+            $.getJSON('/update_data', function(data) {
+                console.log("API Yanıtı:", data); // API yanıtını kontrol et
+                console.log("Anomaliler:", data.anomalies); // Anomalilerin içeriğini kontrol et
+
+                $('#top-ips').empty();
+                data.top_ips.forEach(function(item) {
+                    $('#top-ips').append('<li>' + item[0] + ': ' + item[1] + '</li>');
+                });
+
+                $('#internal-anomalies').empty();
+                $('#external-anomalies').empty();
+
+                const internalAnomalies = {};
+                const externalAnomalies = {};
+
+                data.anomalies.forEach(function(anomaly) {
+                    const ip = anomaly; // Eğer sadece IP varsa
+                    const count = 1; // Her bir IP için görünme sayısını 1 alıyoruz
+
+                    if (isInternalIP(ip)) {
+                        internalAnomalies[ip] = (internalAnomalies[ip] || 0) + count;
+                    } else {
+                        externalAnomalies[ip] = (externalAnomalies[ip] || 0) + count;
+                    }
+                });
+
+                for (const [ip, count] of Object.entries(internalAnomalies)) {
+                    $('#internal-anomalies').append('<tr><td>' + ip + '</td><td>' + count + '</td></tr>');
+                }
+
+                for (const [ip, count] of Object.entries(externalAnomalies)) {
+                    $('#external-anomalies').append('<tr><td>' + ip + '</td><td>' + count + '</td></tr>');
+                }
+            });
+        }
+
+        function isInternalIP(ip) {
+            const internalIPPattern = /^(192\.168|10\.)/; // İç ağ IP kontrolü
+            return internalIPPattern.test(ip);
+        }
+
+        $(document).ready(function() {
+            updateData();
+            setInterval(updateData, 5000);
+
+            $('#load-more').click(function() {
+                updateData();
+            });
+
+            $('#show-all').click(function() {
+                updateData();
+            });
+        });
+    </script>
+</body>
+</html>
