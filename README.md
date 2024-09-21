@@ -18,3 +18,12 @@ Ağ Güvenliği İzleme Sistemi, iç ve dış ağdaki IP adreslerinin trafiğini
 1. **Depoyu Klonlayın:**
    ```bash
    git clone https://github.com/TasovaForce/Ag-Guvenligi-Sistemi.git
+
+   
+### Öneriler:
+- **Gereksinimler** kısmına projede kullanılan kütüphaneleri eklemeyi unutmayın.
+- Eğer projeye katkıda bulunan başka kişiler varsa onları da ekleyebilirsiniz.
+- Kullanıcı dostu olması için örnekler ve açıklamalarla zenginleştirebilirsiniz.
+
+İhtiyacınıza göre bu şablonu özelleştirebilirsiniz!
+
